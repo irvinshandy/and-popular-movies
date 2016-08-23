@@ -34,6 +34,7 @@ import java.util.ArrayList;
 public class MovieFragment extends Fragment {
 
     private MovieAdapter movieAdapter;
+    private SharedPreferences mSharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
     public MovieFragment() {
     }
@@ -72,13 +73,20 @@ public class MovieFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        updateMovie();
+        SharedPreferences.OnSharedPreferenceChangeListener listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                updateMovie();
+            }
+        };
+        mSharedPref.registerOnSharedPreferenceChangeListener(listener);
+        if (movieAdapter == null) {
+            updateMovie();
+        }
     }
 
     public void updateMovie() {
         FetchMovieDataTask movieTask = new FetchMovieDataTask();
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        String sort = sharedPref.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popularity));
+        String sort = mSharedPref.getString(getString(R.string.pref_sort_key), getString(R.string.pref_sort_popularity));
         movieTask.execute(sort);
     }
 
